@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>SortedDecimalMap.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCoverage analysis of project &quot;Lab4&quot; (powered by JaCoCo from EclEmma)</a> &gt; <a href="index.source.html" class="el_package">cs143</a> &gt; <span class="el_source">SortedDecimalMap.java</span></div><h1>SortedDecimalMap.java</h1><pre class="source lang-java linenums">package cs143;
+
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Queue;
+
+/**
+ * This class creates a Sorted Decimal Map using a Decimal Search Tree.
+ *
+ * @author Jonathan Fuller
+ * @author Leiana Omine
+ * @author Tyler Rose
+ * @author Andy Tran
+ * @param &lt;E&gt;
+ */
+public class SortedDecimalMap&lt;E extends DecimalSortable&gt;
+        implements DecimalSearchTree&lt;E&gt; {
+
+    //private fields
+    private DecimalNode root;
+    private int digitCount;
+
+    /**
+     * Constructor.
+     *
+     * @param digitCount the largest number of digits a sorting key will contain
+     * in this sorted decimal map
+     */
+<span class="fc" id="L29">    public SortedDecimalMap(int digitCount) {</span>
+<span class="fc" id="L30">        root = new DecimalNode();</span>
+<span class="fc" id="L31">        this.digitCount = digitCount;</span>
+<span class="fc" id="L32">    }</span>
+
+    /**
+     * Reports if the tree contains the key given.
+     *
+     * @param key to search for.
+     * @return true if a value with the given key exists in the tree, false if
+     * not.
+     */
+    @Override
+    public boolean contains(int key) {
+<span class="fc bfc" id="L43" title="All 2 branches covered.">        if (key &lt; 0) {</span>
+<span class="fc" id="L44">            return false;</span>
+        }
+<span class="fc" id="L46">        LinkedList&lt;Integer&gt; keyDigits = new LinkedList&lt;&gt;();</span>
+<span class="fc bfc" id="L47" title="All 2 branches covered.">        while (key &gt; 0) {</span>
+<span class="fc" id="L48">            keyDigits.addFirst(key % 10);</span>
+<span class="fc" id="L49">            key /= 10;</span>
+        }
+<span class="fc bfc" id="L51" title="All 2 branches covered.">        while (keyDigits.size() &lt; digitCount) {</span>
+<span class="fc" id="L52">            keyDigits.addFirst(0);</span>
+        }
+<span class="fc bfc" id="L54" title="All 2 branches covered.">        if (keyDigits.size() &gt; digitCount) {</span>
+<span class="fc" id="L55">            return false;</span>
+        }
+<span class="fc" id="L57">        DecimalNode node = root;</span>
+<span class="fc" id="L58">        int digitSearch = 0;</span>
+        do {
+<span class="fc bfc" id="L60" title="All 2 branches covered.">            if (node.children[keyDigits.get(digitSearch)] != null) {</span>
+<span class="fc" id="L61">                node = node.children[keyDigits.get(digitSearch)];</span>
+            } else {
+<span class="fc" id="L63">                return false;</span>
+            }
+<span class="fc" id="L65">            digitSearch++;</span>
+<span class="fc bfc" id="L66" title="All 2 branches covered.">        } while (digitSearch &lt; digitCount);</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">        return node.value != null;</span>
+    }
+
+    /**
+     * Reports the value of the key given if it exists.
+     *
+     * @param key to retrieve value from.
+     * @return the value at the given key, or null if it does not exist.
+     */
+    @Override
+    public E get(int key) {
+<span class="fc bfc" id="L78" title="All 2 branches covered.">        if (key &lt; 0) {</span>
+<span class="fc" id="L79">            return null;</span>
+        }
+<span class="fc" id="L81">        LinkedList&lt;Integer&gt; keyDigits = new LinkedList&lt;&gt;();</span>
+<span class="fc bfc" id="L82" title="All 2 branches covered.">        while (key &gt; 0) {</span>
+<span class="fc" id="L83">            keyDigits.addFirst(key % 10);</span>
+<span class="fc" id="L84">            key /= 10;</span>
+        }
+<span class="fc bfc" id="L86" title="All 2 branches covered.">        while (keyDigits.size() &lt; digitCount) {</span>
+<span class="fc" id="L87">            keyDigits.addFirst(0);</span>
+        }
+<span class="fc" id="L89">        DecimalNode node = root;</span>
+<span class="fc" id="L90">        int digitSearch = 0;</span>
+        do {
+<span class="fc bfc" id="L92" title="All 2 branches covered.">            if (node.children[keyDigits.get(digitSearch)] != null) {</span>
+<span class="fc" id="L93">                node = node.children[keyDigits.get(digitSearch)];</span>
+            } else {
+                break;
+            }
+<span class="fc" id="L97">            digitSearch++;</span>
+<span class="fc bfc" id="L98" title="All 2 branches covered.">        } while (digitSearch &lt; digitCount);</span>
+<span class="fc" id="L99">        return (E) node.value;</span>
+    }
+
+    /**
+     * Inserts a value that contains a unique non-negative whole-number key.
+     *
+     * @param e value to insert into the map.
+     * @return true if the value was inserted and false if not.
+     */
+    @Override
+    public boolean insert(E e) {
+<span class="fc" id="L110">        int key = e.getKey();</span>
+<span class="fc bfc" id="L111" title="All 2 branches covered.">        if (contains(key)) {</span>
+<span class="fc" id="L112">            return false;</span>
+        }
+<span class="fc" id="L114">        LinkedList&lt;Integer&gt; keyDigits = new LinkedList&lt;&gt;();</span>
+<span class="fc bfc" id="L115" title="All 2 branches covered.">        while (key &gt; 0) {</span>
+<span class="fc" id="L116">            keyDigits.addFirst(key % 10);</span>
+<span class="fc" id="L117">            key /= 10;</span>
+        }
+<span class="fc bfc" id="L119" title="All 2 branches covered.">        while (keyDigits.size() &lt; digitCount) {</span>
+<span class="fc" id="L120">            keyDigits.addFirst(0);</span>
+        }
+<span class="fc bfc" id="L122" title="All 2 branches covered.">        if (keyDigits.size() &gt; digitCount) {</span>
+<span class="fc" id="L123">            return false;</span>
+        }
+<span class="fc" id="L125">        DecimalNode node = root;</span>
+<span class="fc" id="L126">        int digitSearch = 0;</span>
+        do {
+<span class="fc bfc" id="L128" title="All 2 branches covered.">            if (node.children[keyDigits.get(digitSearch)] != null) {</span>
+<span class="fc" id="L129">                node = node.children[keyDigits.get(digitSearch)];</span>
+            } else {
+<span class="fc" id="L131">                node.makeChild(keyDigits.get(digitSearch));</span>
+<span class="fc" id="L132">                node = node.children[keyDigits.get(digitSearch)];</span>
+            }
+<span class="fc" id="L134">            digitSearch++;</span>
+<span class="fc bfc" id="L135" title="All 2 branches covered.">        } while (digitSearch &lt; digitCount);</span>
+<span class="fc" id="L136">        node.value = e;</span>
+<span class="fc" id="L137">        return true;</span>
+    }
+
+    /**
+     * Removes the value with the given key from the tree.
+     *
+     * @param key of the value to find and remove.
+     * @return true if the value was found and removed and false if not.
+     */
+    @Override
+    public boolean remove(int key) {
+<span class="fc bfc" id="L148" title="All 2 branches covered.">        if (get(key) == null) {</span>
+<span class="fc" id="L149">            return false;</span>
+        }
+<span class="fc" id="L151">        LinkedList&lt;Integer&gt; keyDigits = new LinkedList&lt;&gt;();</span>
+<span class="fc bfc" id="L152" title="All 2 branches covered.">        while (key &gt; 0) {</span>
+<span class="fc" id="L153">            keyDigits.addFirst(key % 10);</span>
+<span class="fc" id="L154">            key /= 10;</span>
+        }
+<span class="fc bfc" id="L156" title="All 2 branches covered.">        while (keyDigits.size() &lt; digitCount) {</span>
+<span class="fc" id="L157">            keyDigits.addFirst(0);</span>
+        }
+<span class="fc" id="L159">        DecimalNode node = root;</span>
+<span class="fc" id="L160">        int digitSearch = 0;</span>
+        do {
+<span class="fc" id="L162">            node = node.children[keyDigits.get(digitSearch)];</span>
+<span class="fc" id="L163">            digitSearch++;</span>
+<span class="fc bfc" id="L164" title="All 2 branches covered.">        } while (digitSearch &lt; digitCount);</span>
+<span class="fc" id="L165">        node.value = null;</span>
+<span class="fc" id="L166">        return true;</span>
+    }
+
+    /**
+     * Reports if the tree is empty or not.
+     *
+     * @return true if the tree is empty, false if not.
+     */
+    @Override
+    public boolean isEmpty() {
+<span class="fc" id="L176">        return isEmpty(root, true);</span>
+    }
+
+    /**
+     * Private recursive method to determine if the tree is empty.
+     *
+     * @param node the current node the recursion is on
+     * @return false if a value is found in the tree, true if recursion is
+     * complete and no values were found
+     */
+    private boolean isEmpty(DecimalNode node, boolean empty) {
+<span class="fc bfc" id="L187" title="All 2 branches covered.">        if (node.value != null) {</span>
+<span class="fc" id="L188">            return false;</span>
+        } else {
+<span class="fc bfc" id="L190" title="All 2 branches covered.">            for (int i = 0; i &lt; 10; i++) {</span>
+<span class="fc bfc" id="L191" title="All 2 branches covered.">                if (node.children[i] != null) {</span>
+<span class="fc bfc" id="L192" title="All 4 branches covered.">                    empty = empty &amp;&amp; isEmpty(node.children[i], empty);</span>
+                }
+            }
+        }
+<span class="fc" id="L196">        return empty;</span>
+    }
+
+    /**
+     * Provides access to a type-specific iterator.
+     *
+     * @return a new iterator object
+     */
+    @Override
+    public Iterator&lt;E&gt; iterator() {
+<span class="fc" id="L206">        return new DecimalIterator();</span>
+    }
+
+    /**
+     * An inner class that defines a type-specific iterator. Uses a queue
+     * internally to manage iterating through the tree.
+     */
+    private class DecimalIterator implements Iterator&lt;E&gt; {
+
+        //private fields
+        private Queue&lt;E&gt; queue;
+        private E lastRemoved;
+
+        /**
+         * Default constructor.
+         */
+<span class="fc" id="L222">        public DecimalIterator() {</span>
+<span class="fc" id="L223">            fillQueue();</span>
+<span class="fc" id="L224">        }</span>
+
+        /**
+         * A private method used to fill the queue.
+         */
+        private void fillQueue() {
+<span class="fc" id="L230">            queue = new LinkedList&lt;&gt;();</span>
+<span class="fc" id="L231">            fillQueue(root);</span>
+<span class="fc" id="L232">        }</span>
+
+        /**
+         * A private recursive method to fill the queue with the value of each
+         * node in sorted order.
+         *
+         * @param node the current node in the recursive process
+         */
+        private void fillQueue(DecimalNode node) {
+<span class="fc bfc" id="L241" title="All 2 branches covered.">            if (node.value != null) {</span>
+<span class="fc" id="L242">                queue.add((E) node.value);</span>
+            } else {
+<span class="fc bfc" id="L244" title="All 2 branches covered.">                for (int i = 0; i &lt; 10; i++) {</span>
+<span class="fc bfc" id="L245" title="All 2 branches covered.">                    if (node.children[i] != null) {</span>
+<span class="fc" id="L246">                        fillQueue(node.children[i]);</span>
+                    }
+                }
+            }
+<span class="fc" id="L250">        }</span>
+
+        /**
+         * Determines if there is a next value in the map.
+         *
+         * @return true if there is a next value, false if not
+         */
+        @Override
+        public boolean hasNext() {
+<span class="fc bfc" id="L259" title="All 2 branches covered.">            if (queue.isEmpty()) {</span>
+<span class="fc" id="L260">                return false;</span>
+            }
+<span class="fc" id="L262">            return true;</span>
+        }
+
+        /**
+         * Provides access to the next value in the map, in sorted order.
+         *
+         * @return the next value
+         */
+        @Override
+        public E next() {
+<span class="fc" id="L272">            lastRemoved = queue.poll();</span>
+<span class="fc" id="L273">            return lastRemoved;</span>
+        }
+
+        /**
+         * Removes the last reported value from the map.
+         */
+        @Override
+        public void remove() {
+<span class="fc" id="L281">            SortedDecimalMap.this.remove(lastRemoved.getKey());</span>
+<span class="fc" id="L282">        }</span>
+    }
+
+    /**
+     * An inner class that defines the decimal tree node.
+     */
+    private class DecimalNode&lt;E&gt; {
+
+        /**
+         * the value stored in this node - will be null for all nodes except the
+         * lowest-level leaf nodes
+         */
+        public E value;
+
+        /**
+         * the array used to store the children of this node
+         */
+        public DecimalNode[] children;
+
+        /**
+         * Default constructor.
+         */
+<span class="fc" id="L304">        public DecimalNode() {</span>
+<span class="fc" id="L305">            children = new DecimalNode[10];</span>
+<span class="fc" id="L306">        }</span>
+
+        /**
+         * A convenience method to create a new node at the given index of the
+         * current node.
+         *
+         * @param index the index of the children array where the new node
+         * should be stored
+         */
+        public void makeChild(int index) {
+<span class="fc" id="L316">            children[index] = new DecimalNode();</span>
+<span class="fc" id="L317">        }</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span></div></body></html>
